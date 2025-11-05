@@ -47,16 +47,16 @@ _set_background_glass("ugb1.png")
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown("""<style>
 :root {
-  --bg: #0b1220;
-  --card: #0f172a;
-  --muted: #94a3b8;
-  --text: #e6efff;
-  --brand: #22c55e;
-  --brand-2: #06b6d4;
-  --brand-3: #a78bfa;
-  --ring: rgba(34,197,94,0.35);
+  --bg: #ffffff;
+  --card: #ffffff;
+  --muted: #1f2937; /* slate-800 for strong contrast on light bg */
+  --text: #0f172a;  /* slate-900 as primary text */
+  --brand: #16a34a;
+  --brand-2: #0e7490;
+  --brand-3: #6d28d9;
+  --ring: rgba(15,23,42,0.25);
 }
-html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--text); }
 .stApp::before, .stApp::after {
   content: "";
   position: fixed;
@@ -89,7 +89,7 @@ html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Rob
   letter-spacing: -0.02em;
   font-size: clamp(1.8rem, 2.5vw + 1.2rem, 3.25rem);
   margin: 0 0 .35rem 0;
-  background: linear-gradient(90deg, var(--text), #c7d2fe 40%, #a7f3d0 85%);
+  background: linear-gradient(90deg, #0f172a, #1f2937 45%, #0b1220 85%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -153,7 +153,7 @@ html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Rob
   border: 1px solid rgba(255,255,255,0.06);
 }
 .section-title {
-  color: #e2e8f0;
+  color: #0f172a;
   font-size: 1.05rem;
   margin-bottom: 0.75rem;
   font-weight: 600;
@@ -195,7 +195,7 @@ with st.container():
     st.markdown(
         """
         <div style='text-align:center; margin: .5rem 0 1rem;'>
-            <p style='color:#a8ffdf; margin:0; font-weight:600; font-size:1rem; letter-spacing:.02em;'>
+            <p style='color:#0f172a; margin:0; font-weight:700; font-size:1rem; letter-spacing:.01em;'>
                 Choose how you want to identify a bird
             </p>
         </div>
@@ -271,7 +271,7 @@ with st.container():
     # Footer
     st.markdown(
         """
-        <div style='text-align:center; color:#94a3b8; margin-top: 1rem; font-size:.9rem;'>
+        <div style='text-align:center; color:#334155; margin-top: 1rem; font-size:.9rem;'>
             Built for the Love of Nature
         </div>
         """,

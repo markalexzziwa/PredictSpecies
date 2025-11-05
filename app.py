@@ -7,6 +7,10 @@ import torch
 import torch.nn as nn
 from torchvision import transforms, models
 import numpy as np
+from gtts import gTTS
+from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
+import tempfile
+import random
 
 # Display logo (centered and resized to one-quarter of original dimensions)
 def _set_background_glass(img_path: str = "ugb1.png"):
@@ -130,6 +134,132 @@ def predict_species(model, label_map, image):
 # Load model and label map
 model = load_model()
 label_map = load_label_map()
+
+# Bird descriptions and colors (simplified - you can expand this)
+BIRD_DATA = {
+    "African Fish-Eagle": {
+        "description": "A majestic bird of prey with a distinctive white head and brown body. It is known for its powerful call and excellent fishing abilities.",
+        "colors": ["white", "brown", "black"]
+    },
+    "African Sacred Ibis": {
+        "description": "A wading bird with a long curved bill and black and white plumage. It is often seen near water bodies.",
+        "colors": ["white", "black"]
+    },
+    "Black Kite": {
+        "description": "A medium-sized bird of prey with dark brown plumage. It is an agile flyer and often seen soaring in the sky.",
+        "colors": ["brown", "black"]
+    },
+    "Grey Heron": {
+        "description": "A tall wading bird with grey plumage and a long neck. It stands motionless waiting for fish in shallow water.",
+        "colors": ["grey", "white", "black"]
+    },
+    "Lilac-breasted Roller": {
+        "description": "A stunning bird with vibrant colors including lilac, blue, green, and brown. It is known for its acrobatic flight displays.",
+        "colors": ["lilac", "blue", "green", "brown"]
+    },
+    "Pied Kingfisher": {
+        "description": "A black and white kingfisher with a distinctive hovering flight pattern. It dives into water to catch fish.",
+        "colors": ["black", "white"]
+    }
+}
+
+def get_bird_info(bird_name):
+    """Get bird information or return default"""
+    return BIRD_DATA.get(bird_name, {
+        "description": f"The {bird_name} is a beautiful bird found in Uganda. It adds to the rich biodiversity of the region.",
+        "colors": ["various"]
+    })
+
+def generate_vivid_bird_story(bird_name, description, colors):
+    """Generate a vivid story about the bird"""
+    color_phrase = ", ".join(colors) if colors else "beautiful"
+    desc = description.strip().capitalize()
+    
+    templates = [
+        f"The {bird_name} is a beautiful bird with {color_phrase} feathers. {desc} It moves gracefully and brings joy to anyone who sees it.",
+        f"In the trees, the {bird_name} stands out with its {color_phrase} colors. {desc} It sings softly and watches the world with calm eyes.",
+        f"The {bird_name} is easy to spot because of its bright {color_phrase} feathers. {desc} It flies quickly and loves to explore the forest.",
+        f"With {color_phrase} feathers, the {bird_name} looks like a flying rainbow. {desc} It's a peaceful bird that enjoys the quiet of nature.",
+        f"The {bird_name} is known for its {color_phrase} colors and gentle sounds. {desc} It glides through the air like a leaf in the wind."
+    ]
+    return random.choice(templates)
+
+def generate_video(bird_name, image_path, output_path):
+    """Generate a video with narration about the bird"""
+    try:
+        # Get bird information
+        bird_info = get_bird_info(bird_name)
+        story = generate_vivid_bird_story(bird_name, bird_info["description"], bird_info["colors"])
+        
+        # Generate audio
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmp_audio:
+            audio_path = tmp_audio.name
+            tts = gTTS(text=story, lang='en', slow=False)
+            tts.save(audio_path)
+        
+        # Create video
+        audio = AudioFileClip(audio_path)
+        duration = audio.duration
+        
+        # Create image clip
+        img_clip = ImageClip(image_path).set_duration(duration).resize(height=720)
+        
+        # Add captions (optional - may fail if ImageMagick not available)
+        caption_clips = []
+        try:
+            words = story.split()
+            total_words = len(words)
+            avg_time_per_word = duration / total_words
+            
+            i = 0
+            while i < total_words:
+                remaining = total_words - i
+                chunk_size = random.randint(2, min(6, remaining)) if remaining >= 2 else remaining
+                chunk_words = words[i:i+chunk_size]
+                chunk_text = " ".join(chunk_words)
+                chunk_start = i * avg_time_per_word
+                chunk_duration = chunk_size * avg_time_per_word
+                
+                txt_clip = TextClip(
+                    chunk_text,
+                    fontsize=40,
+                    font='Arial-Bold',
+                    color='white',
+                    stroke_color='black',
+                    stroke_width=2,
+                    method='caption',
+                    size=(img_clip.w, None),
+                    align='center'
+                )
+                txt_clip = txt_clip.set_position(('center', 'bottom')).set_start(chunk_start).set_duration(chunk_duration)
+                caption_clips.append(txt_clip)
+                
+                i += chunk_size
+        except Exception as e:
+            # If TextClip fails (ImageMagick not available), continue without captions
+            pass
+        
+        # Combine video and audio
+        if caption_clips:
+            final = CompositeVideoClip([img_clip.set_audio(audio)] + caption_clips)
+        else:
+            final = img_clip.set_audio(audio)
+        
+        final.write_videofile(output_path, fps=24, codec='libx264', audio_codec='aac', verbose=False, logger=None)
+        
+        # Cleanup
+        try:
+            os.unlink(audio_path)
+            audio.close()
+            final.close()
+            img_clip.close()
+        except:
+            pass
+        
+        return output_path
+    except Exception as e:
+        st.error(f"Error generating video: {str(e)}")
+        return None
 
 # Global modern theme: fonts, colors, animations, components polish
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
@@ -366,10 +496,53 @@ with st.container():
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Watch video button
-                bird_name = result['species'].replace(' ', '+')
-                youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
-                st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 0.5rem;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+                with col1:
+                    # Watch video button (YouTube)
+                    bird_name = result['species'].replace(' ', '+')
+                    youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
+                    st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                
+                with col2:
+                    # Generate video button
+                    if st.button("🎬 Generate Video", key="generate_video_upload", use_container_width=True):
+                        if 'upload_image' in st.session_state:
+                            with st.spinner("🎬 Generating video with narration..."):
+                                # Save image temporarily
+                                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
+                                    img_path = tmp_img.name
+                                    st.session_state.upload_image.save(img_path)
+                                
+                                # Generate video
+                                with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
+                                    video_path = tmp_video.name
+                                
+                                video_file = generate_video(result['species'], img_path, video_path)
+                                
+                                if video_file and os.path.exists(video_file):
+                                    # Display video
+                                    with open(video_file, 'rb') as f:
+                                        video_bytes = f.read()
+                                    st.video(video_bytes)
+                                    
+                                    # Download button
+                                    st.download_button(
+                                        label="📥 Download Video",
+                                        data=video_bytes,
+                                        file_name=f"{result['species'].replace(' ', '_')}_story.mp4",
+                                        mime="video/mp4"
+                                    )
+                                    
+                                    # Cleanup
+                                    try:
+                                        os.unlink(img_path)
+                                        os.unlink(video_path)
+                                    except:
+                                        pass
+                                else:
+                                    st.error("Failed to generate video. Please try again.")
+                        else:
+                            st.error("Image not found. Please upload an image again.")
                 
                 st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -442,10 +615,53 @@ with st.container():
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    # Watch video button
-                    bird_name = result['species'].replace(' ', '+')
-                    youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
-                    st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 0.5rem;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        # Watch video button (YouTube)
+                        bird_name = result['species'].replace(' ', '+')
+                        youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
+                        st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                    
+                    with col2:
+                        # Generate video button
+                        if st.button("🎬 Generate Video", key="generate_video_camera", use_container_width=True):
+                            if 'camera_image' in st.session_state:
+                                with st.spinner("🎬 Generating video with narration..."):
+                                    # Save image temporarily
+                                    with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
+                                        img_path = tmp_img.name
+                                        st.session_state.camera_image.save(img_path)
+                                    
+                                    # Generate video
+                                    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
+                                        video_path = tmp_video.name
+                                    
+                                    video_file = generate_video(result['species'], img_path, video_path)
+                                    
+                                    if video_file and os.path.exists(video_file):
+                                        # Display video
+                                        with open(video_file, 'rb') as f:
+                                            video_bytes = f.read()
+                                        st.video(video_bytes)
+                                        
+                                        # Download button
+                                        st.download_button(
+                                            label="📥 Download Video",
+                                            data=video_bytes,
+                                            file_name=f"{result['species'].replace(' ', '_')}_story.mp4",
+                                            mime="video/mp4"
+                                        )
+                                        
+                                        # Cleanup
+                                        try:
+                                            os.unlink(img_path)
+                                            os.unlink(video_path)
+                                        except:
+                                            pass
+                                    else:
+                                        st.error("Failed to generate video. Please try again.")
+                            else:
+                                st.error("Image not found. Please capture an image again.")
                     
                     st.markdown("</div>", unsafe_allow_html=True)
 

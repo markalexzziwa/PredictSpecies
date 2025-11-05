@@ -102,20 +102,22 @@ html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Rob
 .hero-badges { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .85rem; }
 .badge {
   font-size: .8rem;
-  color: #d1fae5;
-  background: rgba(16,185,129,0.12);
+  color: #0f172a;
+  background: rgba(15,23,42,0.08);
   padding: .35rem .6rem;
   border-radius: 999px;
-  border: 1px solid rgba(16,185,129,0.25);
+  border: 1px solid rgba(15,23,42,0.15);
+  font-weight: 600;
 }
 .card {
-  background: linear-gradient(180deg, rgba(2,6,23,0.78), rgba(2,6,23,0.6));
-  border: 1px solid rgba(255,255,255,0.06);
+  background: #ffffff;
+  border: 1px solid rgba(2,6,23,0.08);
   border-radius: 16px;
   padding: 1.25rem;
-  box-shadow: 0 6px 18px rgba(2,6,23,0.35);
+  box-shadow: 0 10px 24px rgba(2,6,23,0.06);
+  color: var(--text);
 }
-.card h4 { color: var(--text); margin: 0 0 .5rem 0; font-weight: 600; }
+.card h4 { color: var(--text); margin: 0 0 .5rem 0; font-weight: 700; }
 .card .hint { color: var(--muted); font-size: .92rem; margin-bottom: .75rem; }
 .stButton > button {
   background: linear-gradient(135deg, var(--brand), #16a34a);
@@ -131,18 +133,19 @@ html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Rob
 .stButton > button:hover { filter: brightness(1.05); box-shadow: 0 10px 18px rgba(16,185,129,0.32); }
 .stButton > button:active { transform: translateY(1px); }
 [data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"] {
-  border: 1px dashed rgba(148,163,184,0.35);
-  background: rgba(15,23,42,0.4);
+  border: 1px dashed rgba(2,6,23,0.15);
+  background: #f8fafc;
   transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
   border-radius: 14px;
 }
 [data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"]:hover {
-  border-color: rgba(34,197,94,0.55);
-  box-shadow: 0 8px 20px rgba(34,197,94,0.18);
-  background: rgba(15,23,42,0.55);
+  border-color: rgba(15,23,42,0.45);
+  box-shadow: 0 8px 20px rgba(2,6,23,0.08);
+  background: #f1f5f9;
 }
-[data-testid="stFileUploader"] section > div { color: var(--muted) !important; }
-[data-testid="stCameraInputLabel"] { color: var(--text) !important; font-weight: 500; }
+[data-testid="stFileUploader"] section > div { color: #0f172a !important; }
+[data-testid="stFileUploader"] label { color: #0f172a !important; font-weight: 600; }
+[data-testid="stCameraInputLabel"] { color: #0f172a !important; font-weight: 600; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .fade { animation: fadeUp .4s ease both; }
 .input-section {

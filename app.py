@@ -467,6 +467,8 @@ with st.container():
             # Clear previous result when new image is uploaded
             if 'upload_result' in st.session_state:
                 del st.session_state.upload_result
+            if 'generate_video_upload' in st.session_state:
+                del st.session_state.generate_video_upload
             
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded Image', use_column_width=True)
@@ -496,53 +498,63 @@ with st.container():
                 </div>
                 """, unsafe_allow_html=True)
                 
-                col1, col2 = st.columns(2)
-                with col1:
-                    # Watch video button (YouTube)
-                    bird_name = result['species'].replace(' ', '+')
-                    youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
-                    st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                # Generate video button
+                if st.button("🎬 Generate Video", key="generate_video_upload", use_container_width=True):
+                    st.session_state.generate_video_upload = True
                 
-                with col2:
-                    # Generate video button
-                    if st.button("🎬 Generate Video", key="generate_video_upload", use_container_width=True):
-                        if 'upload_image' in st.session_state:
-                            with st.spinner("🎬 Generating video with narration..."):
-                                # Save image temporarily
-                                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
-                                    img_path = tmp_img.name
-                                    st.session_state.upload_image.save(img_path)
+                # Show video placeholder or generated video
+                if st.session_state.get('generate_video_upload', False):
+                    if 'upload_image' in st.session_state:
+                        # Show placeholder immediately
+                        placeholder_video = st.empty()
+                        placeholder_video.markdown("""
+                        <div style='background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px dashed #94a3b8; border-radius: 12px; padding: 3rem; text-align: center; margin: 1rem 0;'>
+                            <div style='font-size: 3rem; margin-bottom: 1rem;'>🎬</div>
+                            <div style='color: #0f172a; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;'>Generating Video...</div>
+                            <div style='color: #64748b; font-size: 0.9rem;'>Creating narration and combining with your image</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        with st.spinner("🎬 Generating video with narration..."):
+                            # Save image temporarily
+                            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
+                                img_path = tmp_img.name
+                                st.session_state.upload_image.save(img_path)
+                            
+                            # Generate video
+                            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
+                                video_path = tmp_video.name
+                            
+                            video_file = generate_video(result['species'], img_path, video_path)
+                            
+                            if video_file and os.path.exists(video_file):
+                                # Clear placeholder and show actual video
+                                placeholder_video.empty()
                                 
-                                # Generate video
-                                with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
-                                    video_path = tmp_video.name
+                                # Display video
+                                with open(video_file, 'rb') as f:
+                                    video_bytes = f.read()
+                                st.video(video_bytes)
                                 
-                                video_file = generate_video(result['species'], img_path, video_path)
+                                # Download button
+                                st.download_button(
+                                    label="📥 Download Video",
+                                    data=video_bytes,
+                                    file_name=f"{result['species'].replace(' ', '_')}_story.mp4",
+                                    mime="video/mp4"
+                                )
                                 
-                                if video_file and os.path.exists(video_file):
-                                    # Display video
-                                    with open(video_file, 'rb') as f:
-                                        video_bytes = f.read()
-                                    st.video(video_bytes)
-                                    
-                                    # Download button
-                                    st.download_button(
-                                        label="📥 Download Video",
-                                        data=video_bytes,
-                                        file_name=f"{result['species'].replace(' ', '_')}_story.mp4",
-                                        mime="video/mp4"
-                                    )
-                                    
-                                    # Cleanup
-                                    try:
-                                        os.unlink(img_path)
-                                        os.unlink(video_path)
-                                    except:
-                                        pass
-                                else:
-                                    st.error("Failed to generate video. Please try again.")
-                        else:
-                            st.error("Image not found. Please upload an image again.")
+                                # Cleanup
+                                try:
+                                    os.unlink(img_path)
+                                    os.unlink(video_path)
+                                except:
+                                    pass
+                            else:
+                                placeholder_video.empty()
+                                st.error("Failed to generate video. Please try again.")
+                    else:
+                        st.error("Image not found. Please upload an image again.")
                 
                 st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
@@ -586,6 +598,8 @@ with st.container():
                 # Clear previous result when new photo is captured
                 if 'camera_result' in st.session_state:
                     del st.session_state.camera_result
+                if 'generate_video_camera' in st.session_state:
+                    del st.session_state.generate_video_camera
                 
                 image = Image.open(camera_photo)
                 st.image(image, caption='Captured Photo', use_column_width=True)
@@ -615,53 +629,63 @@ with st.container():
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        # Watch video button (YouTube)
-                        bird_name = result['species'].replace(' ', '+')
-                        youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
-                        st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                    # Generate video button
+                    if st.button("🎬 Generate Video", key="generate_video_camera", use_container_width=True):
+                        st.session_state.generate_video_camera = True
                     
-                    with col2:
-                        # Generate video button
-                        if st.button("🎬 Generate Video", key="generate_video_camera", use_container_width=True):
-                            if 'camera_image' in st.session_state:
-                                with st.spinner("🎬 Generating video with narration..."):
-                                    # Save image temporarily
-                                    with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
-                                        img_path = tmp_img.name
-                                        st.session_state.camera_image.save(img_path)
+                    # Show video placeholder or generated video
+                    if st.session_state.get('generate_video_camera', False):
+                        if 'camera_image' in st.session_state:
+                            # Show placeholder immediately
+                            placeholder_video = st.empty()
+                            placeholder_video.markdown("""
+                            <div style='background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px dashed #94a3b8; border-radius: 12px; padding: 3rem; text-align: center; margin: 1rem 0;'>
+                                <div style='font-size: 3rem; margin-bottom: 1rem;'>🎬</div>
+                                <div style='color: #0f172a; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;'>Generating Video...</div>
+                                <div style='color: #64748b; font-size: 0.9rem;'>Creating narration and combining with your image</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            with st.spinner("🎬 Generating video with narration..."):
+                                # Save image temporarily
+                                with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
+                                    img_path = tmp_img.name
+                                    st.session_state.camera_image.save(img_path)
+                                
+                                # Generate video
+                                with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
+                                    video_path = tmp_video.name
+                                
+                                video_file = generate_video(result['species'], img_path, video_path)
+                                
+                                if video_file and os.path.exists(video_file):
+                                    # Clear placeholder and show actual video
+                                    placeholder_video.empty()
                                     
-                                    # Generate video
-                                    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video:
-                                        video_path = tmp_video.name
+                                    # Display video
+                                    with open(video_file, 'rb') as f:
+                                        video_bytes = f.read()
+                                    st.video(video_bytes)
                                     
-                                    video_file = generate_video(result['species'], img_path, video_path)
+                                    # Download button
+                                    st.download_button(
+                                        label="📥 Download Video",
+                                        data=video_bytes,
+                                        file_name=f"{result['species'].replace(' ', '_')}_story.mp4",
+                                        mime="video/mp4"
+                                    )
                                     
-                                    if video_file and os.path.exists(video_file):
-                                        # Display video
-                                        with open(video_file, 'rb') as f:
-                                            video_bytes = f.read()
-                                        st.video(video_bytes)
-                                        
-                                        # Download button
-                                        st.download_button(
-                                            label="📥 Download Video",
-                                            data=video_bytes,
-                                            file_name=f"{result['species'].replace(' ', '_')}_story.mp4",
-                                            mime="video/mp4"
-                                        )
-                                        
-                                        # Cleanup
-                                        try:
-                                            os.unlink(img_path)
-                                            os.unlink(video_path)
-                                        except:
-                                            pass
-                                    else:
-                                        st.error("Failed to generate video. Please try again.")
-                            else:
-                                st.error("Image not found. Please capture an image again.")
+                                    # Cleanup
+                                    try:
+                                        os.unlink(img_path)
+                                        os.unlink(video_path)
+                                    except:
+                                        pass
+                                else:
+                                    placeholder_video.empty()
+                                    st.error("Failed to generate video. Please try again.")
+                        else:
+                            st.error("Image not found. Please capture an image again.")
                     
                     st.markdown("</div>", unsafe_allow_html=True)
 

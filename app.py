@@ -401,7 +401,6 @@ with st.container():
                             result = predict_species(model, label_map, image)
                         
                         if result:
-                            st.markdown("<div class='result-card'>", unsafe_allow_html=True)
                             st.markdown("<div class='result-title'>🦅 Identification Result</div>", unsafe_allow_html=True)
                             st.markdown(f"""
                             <div class='result-item'>

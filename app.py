@@ -44,111 +44,121 @@ def _set_background_glass(img_path: str = "ugb1.png"):
 _set_background_glass("ugb1.png")
 
 # Global modern theme: fonts, colors, animations, components polish
-st.markdown(
-    """
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --bg: #0b1220;
-        --card: #0f172a;
-        --muted: #94a3b8;
-        --text: #e6efff;
-        --brand: #22c55e;
-        --brand-2: #06b6d4;
-        --brand-3: #a78bfa;
-        --ring: rgba(34,197,94,0.35);
-      }
-
-      html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-
-      /* Hero gradient background accents */
-      .stApp::before,
-      .stApp::after {
-        content: "";
-        position: fixed;
-        inset: auto auto 10% -10%;
-        width: 40vw; height: 40vw;
-        background: radial-gradient(closest-side, rgba(34,197,94,0.18), transparent 65%);
-        filter: blur(40px);
-        z-index: 0; pointer-events: none;
-      }
-      .stApp::after {
-        inset: -15% -10% auto auto; width: 35vw; height: 35vw;
-        background: radial-gradient(closest-side, rgba(6,182,212,0.16), transparent 65%);
-      }
-
-      /* Elevate Streamlit blocks slightly above accents */
-      .stApp .main .block-container { position: relative; z-index: 1; }
-
-      /* Modern hero section */
-      .hero {
-        background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(15,23,42,0.55));
-        border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 20px;
-        padding: 2.25rem;
-        margin: 0.75rem 0 1.5rem 0;
-        box-shadow: 0 12px 30px rgba(2,6,23,0.45);
-      }
-      .hero-title {
-        font-family: Poppins, Inter, system-ui;
-        font-weight: 800; letter-spacing: -0.02em;
-        font-size: clamp(1.8rem, 2.5vw + 1.2rem, 3.25rem);
-        margin: 0 0 .35rem 0;
-        background: linear-gradient(90deg, var(--text), #c7d2fe 40%, #a7f3d0 85%);
-        -webkit-background-clip: text; background-clip: text; color: transparent;
-      }
-      .hero-sub {
-        color: var(--muted); font-size: 1.05rem; line-height: 1.6;
-      }
-      .hero-badges { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .85rem; }
-      .badge {
-        font-size: .8rem; color: #d1fae5; background: rgba(16,185,129,0.12);
-        padding: .35rem .6rem; border-radius: 999px; border: 1px solid rgba(16,185,129,0.25);
-      }
-
-      /* Card styling used below */
-      .card {
-        background: linear-gradient(180deg, rgba(2,6,23,0.78), rgba(2,6,23,0.6));
-        border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 16px; padding: 1.25rem; box-shadow: 0 6px 18px rgba(2,6,23,0.35);
-      }
-      .card h4 { color: var(--text); margin: 0 0 .5rem 0; font-weight: 600; }
-      .card .hint { color: var(--muted); font-size: .92rem; margin-bottom: .75rem; }
-
-      /* Buttons */
-      .stButton > button {
-        background: linear-gradient(135deg, var(--brand), #16a34a);
-        color: white; border: 0; padding: .7rem 1rem; border-radius: 10px;
-        width: 100%; font-weight: 600; box-shadow: 0 6px 14px rgba(16,185,129,0.28);
-        transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
-      }
-      .stButton > button:hover { filter: brightness(1.05); box-shadow: 0 10px 18px rgba(16,185,129,0.32); }
-      .stButton > button:active { transform: translateY(1px); }
-
-      /* File uploader */
-      [data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"] {
-        border: 1px dashed rgba(148,163,184,0.35);
-        background: rgba(15,23,42,0.4);
-        transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
-        border-radius: 14px;
-      }
-      [data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"]:hover {
-        border-color: rgba(34,197,94,0.55);
-        box-shadow: 0 8px 20px rgba(34,197,94,0.18);
-        background: rgba(15,23,42,0.55);
-      }
-      [data-testid="stFileUploader"] section > div { color: var(--muted) !important; }
-
-      /* Camera label + container */
-      [data-testid="stCameraInputLabel"] { color: var(--text) !important; font-weight: 500; }
-
-      /* Subtle fade-in */
-      @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-      .fade { animation: fadeUp .4s ease both; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
+st.markdown("""<style>
+:root {
+  --bg: #0b1220;
+  --card: #0f172a;
+  --muted: #94a3b8;
+  --text: #e6efff;
+  --brand: #22c55e;
+  --brand-2: #06b6d4;
+  --brand-3: #a78bfa;
+  --ring: rgba(34,197,94,0.35);
+}
+html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+.stApp::before, .stApp::after {
+  content: "";
+  position: fixed;
+  inset: auto auto 10% -10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(closest-side, rgba(34,197,94,0.18), transparent 65%);
+  filter: blur(40px);
+  z-index: 0;
+  pointer-events: none;
+}
+.stApp::after {
+  inset: -15% -10% auto auto;
+  width: 35vw;
+  height: 35vw;
+  background: radial-gradient(closest-side, rgba(6,182,212,0.16), transparent 65%);
+}
+.stApp .main .block-container { position: relative; z-index: 1; }
+.hero {
+  background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(15,23,42,0.55));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 2.25rem;
+  margin: 0.75rem 0 1.5rem 0;
+  box-shadow: 0 12px 30px rgba(2,6,23,0.45);
+}
+.hero-title {
+  font-family: Poppins, Inter, system-ui;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.8rem, 2.5vw + 1.2rem, 3.25rem);
+  margin: 0 0 .35rem 0;
+  background: linear-gradient(90deg, var(--text), #c7d2fe 40%, #a7f3d0 85%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-sub {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+.hero-badges { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .85rem; }
+.badge {
+  font-size: .8rem;
+  color: #d1fae5;
+  background: rgba(16,185,129,0.12);
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(16,185,129,0.25);
+}
+.card {
+  background: linear-gradient(180deg, rgba(2,6,23,0.78), rgba(2,6,23,0.6));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.35);
+}
+.card h4 { color: var(--text); margin: 0 0 .5rem 0; font-weight: 600; }
+.card .hint { color: var(--muted); font-size: .92rem; margin-bottom: .75rem; }
+.stButton > button {
+  background: linear-gradient(135deg, var(--brand), #16a34a);
+  color: white;
+  border: 0;
+  padding: .7rem 1rem;
+  border-radius: 10px;
+  width: 100%;
+  font-weight: 600;
+  box-shadow: 0 6px 14px rgba(16,185,129,0.28);
+  transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+}
+.stButton > button:hover { filter: brightness(1.05); box-shadow: 0 10px 18px rgba(16,185,129,0.32); }
+.stButton > button:active { transform: translateY(1px); }
+[data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"] {
+  border: 1px dashed rgba(148,163,184,0.35);
+  background: rgba(15,23,42,0.4);
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+  border-radius: 14px;
+}
+[data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"]:hover {
+  border-color: rgba(34,197,94,0.55);
+  box-shadow: 0 8px 20px rgba(34,197,94,0.18);
+  background: rgba(15,23,42,0.55);
+}
+[data-testid="stFileUploader"] section > div { color: var(--muted) !important; }
+[data-testid="stCameraInputLabel"] { color: var(--text) !important; font-weight: 500; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.fade { animation: fadeUp .4s ease both; }
+.input-section {
+  background: rgba(2,6,23,0.75);
+  border-radius: 14px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.section-title {
+  color: #e2e8f0;
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+</style>""", unsafe_allow_html=True)
 try:
     _logo = Image.open("ugb1.png")
     _w, _h = _logo.size
@@ -156,46 +166,6 @@ try:
     _new_w = max(1, _w // 2)  # Changed from 4 to 2 to make image twice as large
     _new_h = max(1, _h // 2)
     _logo_small = _logo.resize((_new_w, _new_h), Image.LANCZOS)
-    # Add the logo and title directly without centering
-    # Custom CSS for dark card layout
-    st.markdown("""
-        <style>
-        .dark-card {
-            background: rgba(23, 23, 35, 0.92);
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin: 2rem auto;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            max-width: 1200px;
-        }
-        .input-section {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .section-title {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-weight: 300;
-        }
-        /* Override Streamlit's default text colors in the dark card */
-        .dark-card label, 
-        .dark-card .stTextInput > label,
-        .dark-card .stFileUploader label,
-        .dark-card .stFileUploader span,
-        .dark-card [data-testid="stCameraInputLabel"] {
-            color: rgba(255,255,255,0.8) !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
 
     # Hero header with logo and gradient title
     with st.container():
@@ -220,24 +190,6 @@ except Exception:
 
 # Centered welcome message (italic)
 st.markdown("<p style='text-align: center; margin-top: -1rem; margin-bottom: 2rem;'><em>Upload any bird image you'd like to learn more about it. Discover more about the birds of Uganda!</em></p>", unsafe_allow_html=True)
-
-st.markdown("""
-<style>
-.input-section {
-    background: rgba(2,6,23,0.75);
-    border-radius: 14px;
-    padding: 1rem;
-    margin: 0.5rem 0;
-    border: 1px solid rgba(255,255,255,0.06);
-}
-.section-title {
-    color: #e2e8f0;
-    font-size: 1.05rem;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # Main content container with modern layout
 with st.container():

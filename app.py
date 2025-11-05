@@ -42,6 +42,113 @@ def _set_background_glass(img_path: str = "ugb1.png"):
 
 # Apply the background/glass style
 _set_background_glass("ugb1.png")
+
+# Global modern theme: fonts, colors, animations, components polish
+st.markdown(
+    """
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #0b1220;
+        --card: #0f172a;
+        --muted: #94a3b8;
+        --text: #e6efff;
+        --brand: #22c55e;
+        --brand-2: #06b6d4;
+        --brand-3: #a78bfa;
+        --ring: rgba(34,197,94,0.35);
+      }
+
+      html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+
+      /* Hero gradient background accents */
+      .stApp::before,
+      .stApp::after {
+        content: "";
+        position: fixed;
+        inset: auto auto 10% -10%;
+        width: 40vw; height: 40vw;
+        background: radial-gradient(closest-side, rgba(34,197,94,0.18), transparent 65%);
+        filter: blur(40px);
+        z-index: 0; pointer-events: none;
+      }
+      .stApp::after {
+        inset: -15% -10% auto auto; width: 35vw; height: 35vw;
+        background: radial-gradient(closest-side, rgba(6,182,212,0.16), transparent 65%);
+      }
+
+      /* Elevate Streamlit blocks slightly above accents */
+      .stApp .main .block-container { position: relative; z-index: 1; }
+
+      /* Modern hero section */
+      .hero {
+        background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(15,23,42,0.55));
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        padding: 2.25rem;
+        margin: 0.75rem 0 1.5rem 0;
+        box-shadow: 0 12px 30px rgba(2,6,23,0.45);
+      }
+      .hero-title {
+        font-family: Poppins, Inter, system-ui;
+        font-weight: 800; letter-spacing: -0.02em;
+        font-size: clamp(1.8rem, 2.5vw + 1.2rem, 3.25rem);
+        margin: 0 0 .35rem 0;
+        background: linear-gradient(90deg, var(--text), #c7d2fe 40%, #a7f3d0 85%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .hero-sub {
+        color: var(--muted); font-size: 1.05rem; line-height: 1.6;
+      }
+      .hero-badges { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .85rem; }
+      .badge {
+        font-size: .8rem; color: #d1fae5; background: rgba(16,185,129,0.12);
+        padding: .35rem .6rem; border-radius: 999px; border: 1px solid rgba(16,185,129,0.25);
+      }
+
+      /* Card styling used below */
+      .card {
+        background: linear-gradient(180deg, rgba(2,6,23,0.78), rgba(2,6,23,0.6));
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px; padding: 1.25rem; box-shadow: 0 6px 18px rgba(2,6,23,0.35);
+      }
+      .card h4 { color: var(--text); margin: 0 0 .5rem 0; font-weight: 600; }
+      .card .hint { color: var(--muted); font-size: .92rem; margin-bottom: .75rem; }
+
+      /* Buttons */
+      .stButton > button {
+        background: linear-gradient(135deg, var(--brand), #16a34a);
+        color: white; border: 0; padding: .7rem 1rem; border-radius: 10px;
+        width: 100%; font-weight: 600; box-shadow: 0 6px 14px rgba(16,185,129,0.28);
+        transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+      }
+      .stButton > button:hover { filter: brightness(1.05); box-shadow: 0 10px 18px rgba(16,185,129,0.32); }
+      .stButton > button:active { transform: translateY(1px); }
+
+      /* File uploader */
+      [data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"] {
+        border: 1px dashed rgba(148,163,184,0.35);
+        background: rgba(15,23,42,0.4);
+        transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+        border-radius: 14px;
+      }
+      [data-testid="stFileUploader"] div[data-testid="stFileUploaderDropzone"]:hover {
+        border-color: rgba(34,197,94,0.55);
+        box-shadow: 0 8px 20px rgba(34,197,94,0.18);
+        background: rgba(15,23,42,0.55);
+      }
+      [data-testid="stFileUploader"] section > div { color: var(--muted) !important; }
+
+      /* Camera label + container */
+      [data-testid="stCameraInputLabel"] { color: var(--text) !important; font-weight: 500; }
+
+      /* Subtle fade-in */
+      @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      .fade { animation: fadeUp .4s ease both; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 try:
     _logo = Image.open("ugb1.png")
     _w, _h = _logo.size
@@ -90,12 +197,23 @@ try:
         </style>
         """, unsafe_allow_html=True)
 
-    # Create columns for logo and title
-    logo_col, title_col = st.columns([1, 2])
-    with logo_col:
-        st.image(_logo_small, use_column_width=False)
-    with title_col:
-        st.markdown("<h1 style='margin: 1rem 0 0.1rem 1rem; font-size: 3rem;'>Birds in Uganda</h1>", unsafe_allow_html=True)
+    # Hero header with logo and gradient title
+    with st.container():
+        st.markdown("<div class='hero fade'>", unsafe_allow_html=True)
+        logo_col, text_col = st.columns([1, 3])
+        with logo_col:
+            st.image(_logo_small, use_column_width=False)
+        with text_col:
+            st.markdown("<div class='hero-title'>Birds in Uganda</div>", unsafe_allow_html=True)
+            st.markdown(
+                "<div class='hero-sub'>Identify birds from photos in seconds. Upload an image or use your camera to discover species, with a beautiful, distraction-free interface.</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                "<div class='hero-badges'><span class='badge'>Smart Vision</span><span class='badge'>On-device Capture</span><span class='badge'>UG Species Focus</span></div>",
+                unsafe_allow_html=True,
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
 except Exception:
     # If logo not found or cannot be opened, skip silently
     pass
@@ -106,40 +224,34 @@ st.markdown("<p style='text-align: center; margin-top: -1rem; margin-bottom: 2re
 st.markdown("""
 <style>
 .input-section {
-    background: rgba(255,255,255,0.98);
-    border-radius: 10px;
+    background: rgba(2,6,23,0.75);
+    border-radius: 14px;
     padding: 1rem;
     margin: 0.5rem 0;
-    border: 1px solid rgba(230,230,230,0.8);
+    border: 1px solid rgba(255,255,255,0.06);
 }
 .section-title {
-    color: #1f2937;
+    color: #e2e8f0;
     font-size: 1.05rem;
     margin-bottom: 0.75rem;
     font-weight: 600;
 }
-.stButton > button {
-    width: 100%;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    background: rgba(34,197,94,0.9);
-    color: white;
-    border: none;
-}
-.stButton > button:hover { background: rgba(21,128,61,0.95); }
 </style>
 """, unsafe_allow_html=True)
 
 # Main content container with modern layout
 with st.container():
     # Instructions
-    st.markdown("""
-        <div style='text-align:center; margin-bottom: 3rem; border-top: 4px solid rgba(34,197,94,0.9); padding-top: 1.5rem;'>
-            <p style='color: rgba(34,197,94,0.9); margin: 0; font-weight: 500; font-size: 1.05rem;'>
-            Choose one of the options below to identify a bird
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div style='text-align:center; margin-bottom: 1.25rem;'>
+            <p style='color: #a8ffdf; margin: 0; font-weight: 600; font-size: 1rem; letter-spacing: .02em;'>
+                Choose one of the options below to identify a bird
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
     # Create columns for the interactive elements
@@ -148,21 +260,25 @@ with st.container():
     # Upload section with modern styling
     
     with col1:
-        st.markdown("<h4 style='margin-bottom:0.5rem; color:#1f2937;'>📁 Upload Image</h4>", unsafe_allow_html=True)
+        st.markdown("<div class='card fade'>", unsafe_allow_html=True)
+        st.markdown("<h4>📁 Upload Image</h4>", unsafe_allow_html=True)
+        st.markdown("<div class='hint'>PNG or JPEG. Clear, close-up shots improve results.</div>", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Select a bird image", type=['png', 'jpg', 'jpeg'])
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded Image', use_column_width=True)
             # Show Identify Specie button below the image
             st.button("Identify Specie", key="identify_specie_button")
+        st.markdown("</div>", unsafe_allow_html=True)
     
     # Camera section with modern styling
     with col2:
+        st.markdown("<div class='card fade'>", unsafe_allow_html=True)
         if 'camera_active' not in st.session_state:
             st.session_state.camera_active = False
 
         # Camera controls
-        st.markdown("<h4 style='margin-bottom:0.5rem; color:#1f2937;'>📷 Take Picture</h4>", unsafe_allow_html=True)
+        st.markdown("<h4>📷 Take Picture</h4>", unsafe_allow_html=True)
         # When the camera is inactive show a black placeholder that mimics the camera preview.
         # It disappears when the user clicks Start Camera and the real camera input is opened.
         if not st.session_state.camera_active:
@@ -181,13 +297,13 @@ with st.container():
                     st.markdown(_img_html, unsafe_allow_html=True)
                 else:
                     st.markdown(
-                        "<div style='width:100%; aspect-ratio:4/3; min-height:280px; background:#000; border-radius:8px; margin-bottom:0.75rem; box-shadow: inset 0 0 40px rgba(0,0,0,0.6);'></div>",
+                        "<div style='width:100%; aspect-ratio:4/3; min-height:280px; background:linear-gradient(180deg,#0b1220,#0b1220 60%, #0f172a); border-radius:12px; margin-bottom:0.75rem; box-shadow: inset 0 0 40px rgba(0,0,0,0.6);'></div>",
                         unsafe_allow_html=True,
                     )
             except Exception:
                 # If anything goes wrong showing the image, fall back to the black block so UI remains usable.
                 st.markdown(
-                    "<div style='width:100%; aspect-ratio:4/3; min-height:280px; background:#000; border-radius:8px; margin-bottom:0.75rem; box-shadow: inset 0 0 40px rgba(0,0,0,0.6);'></div>",
+                    "<div style='width:100%; aspect-ratio:4/3; min-height:280px; background:linear-gradient(180deg,#0b1220,#0b1220 60%, #0f172a); border-radius:12px; margin-bottom:0.75rem; box-shadow: inset 0 0 40px rgba(0,0,0,0.6);'></div>",
                     unsafe_allow_html=True,
                 )
 
@@ -207,5 +323,25 @@ with st.container():
             
             if st.button("Stop Camera ⏹️", key="stop_camera_button", help="Click to stop camera preview"):
                 st.session_state.camera_active = False
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # Sidebar info
+    with st.sidebar:
+        st.markdown("""
+        <div class='card fade'>
+          <h4>About</h4>
+          <div class='hint'>This demo helps identify birds commonly found across Uganda. For best results, ensure good lighting and a clear subject.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Footer
+    st.markdown(
+        """
+        <div style='text-align:center; color:#94a3b8; margin-top: 1rem; font-size:.9rem;'>
+            Built with ❤️ for nature enthusiasts · Modern UI theme applied
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     
     # (no wrapper divs to close)

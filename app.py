@@ -100,30 +100,29 @@ def preprocess_image(image):
     return image_tensor
 
 def predict_species(model, label_map, image):
-    """Predict bird species from image"""
+    """Predict bird species from image - returns top prediction only"""
     try:
         # Preprocess image
         image_tensor = preprocess_image(image)
         
         # Make prediction
         with torch.no_grad():
-            outputs = model(image_tensor)
-            probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
+            outputs = model(image_tensor)  # Shape: (batch_size, num_classes) = (1, 30)
+            probabilities = torch.nn.functional.softmax(outputs, dim=1)  # Apply softmax along class dimension
             
-        # Get top 3 predictions
-        top3_prob, top3_indices = torch.topk(probabilities, 3)
+        # Get top prediction (dim=1 is the class dimension)
+        top_prob, top_index = torch.max(probabilities, dim=1)
         
-        results = []
-        for i in range(3):
-            idx = top3_indices[i].item()
-            prob = top3_prob[i].item()
-            bird_name = label_map.get(idx, f"Class {idx}")
-            results.append({
-                'species': bird_name,
-                'confidence': prob * 100
-            })
+        idx = top_index.item()
+        prob = top_prob.item()
+        bird_name = label_map.get(idx, f"Class {idx}")
         
-        return results
+        result = {
+            'species': bird_name,
+            'confidence': prob * 100
+        }
+        
+        return result
     except Exception as e:
         st.error(f"Error during prediction: {str(e)}")
         return None
@@ -341,18 +340,17 @@ with st.container():
             if st.button("Identify Specie", key="identify_specie_upload_button"):
                 if model is not None and label_map is not None:
                     with st.spinner("🔍 Analyzing image..."):
-                        results = predict_species(model, label_map, image)
+                        result = predict_species(model, label_map, image)
                     
-                    if results:
+                    if result:
                         st.markdown("<div class='result-card'>", unsafe_allow_html=True)
-                        st.markdown("<div class='result-title'>🦅 Identification Results</div>", unsafe_allow_html=True)
-                        for i, result in enumerate(results):
-                            st.markdown(f"""
-                            <div class='result-item'>
-                                <div class='result-species'>{i+1}. {result['species']}</div>
-                                <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
-                            </div>
-                            """, unsafe_allow_html=True)
+                        st.markdown("<div class='result-title'>🦅 Identification Result</div>", unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class='result-item'>
+                            <div class='result-species'>{result['species']}</div>
+                            <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
+                        </div>
+                        """, unsafe_allow_html=True)
                         st.markdown("</div>", unsafe_allow_html=True)
                 else:
                     st.error("Model or label map not loaded. Please check if the files exist.")
@@ -400,18 +398,17 @@ with st.container():
                 if st.button("Identify Specie", key="identify_specie_camera_button"):
                     if model is not None and label_map is not None:
                         with st.spinner("🔍 Analyzing image..."):
-                            results = predict_species(model, label_map, image)
+                            result = predict_species(model, label_map, image)
                         
-                        if results:
+                        if result:
                             st.markdown("<div class='result-card'>", unsafe_allow_html=True)
-                            st.markdown("<div class='result-title'>🦅 Identification Results</div>", unsafe_allow_html=True)
-                            for i, result in enumerate(results):
-                                st.markdown(f"""
-                                <div class='result-item'>
-                                    <div class='result-species'>{i+1}. {result['species']}</div>
-                                    <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
-                                </div>
-                                """, unsafe_allow_html=True)
+                            st.markdown("<div class='result-title'>🦅 Identification Result</div>", unsafe_allow_html=True)
+                            st.markdown(f"""
+                            <div class='result-item'>
+                                <div class='result-species'>{result['species']}</div>
+                                <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
+                            </div>
+                            """, unsafe_allow_html=True)
                             st.markdown("</div>", unsafe_allow_html=True)
                     else:
                         st.error("Model or label map not loaded. Please check if the files exist.")

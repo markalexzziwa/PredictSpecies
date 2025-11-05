@@ -188,64 +188,52 @@ except Exception:
     # If logo not found or cannot be opened, skip silently
     pass
 
-# Centered welcome message (italic)
-st.markdown("<p style='text-align: center; margin-top: -1rem; margin-bottom: 2rem;'><em>Upload any bird image you'd like to learn more about it. Discover more about the birds of Uganda!</em></p>", unsafe_allow_html=True)
+# Remove old italic banner to reduce clutter and rely on hero subtitle
 
 # Main content container with modern layout
 with st.container():
-    # Instructions
+    # Section prompt
     st.markdown(
         """
-        <div style='text-align:center; margin-bottom: 1.25rem;'>
-            <p style='color: #a8ffdf; margin: 0; font-weight: 600; font-size: 1rem; letter-spacing: .02em;'>
-                Choose one of the options below to identify a bird
+        <div style='text-align:center; margin: .5rem 0 1rem;'>
+            <p style='color:#a8ffdf; margin:0; font-weight:600; font-size:1rem; letter-spacing:.02em;'>
+                Choose how you want to identify a bird
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    tab_upload, tab_camera = st.tabs(["📁 Upload", "📷 Camera"])
 
-    # Create columns for the interactive elements
-    col1, col2 = st.columns(2)
-    
-    # Upload section with modern styling
-    
-    with col1:
+    with tab_upload:
         st.markdown("<div class='card fade'>", unsafe_allow_html=True)
         st.markdown("<h4>📁 Upload Image</h4>", unsafe_allow_html=True)
         st.markdown("<div class='hint'>PNG or JPEG. Clear, close-up shots improve results.</div>", unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("Select a bird image", type=['png', 'jpg', 'jpeg'])
+        uploaded_file = st.file_uploader("Select a bird image", type=['png', 'jpg', 'jpeg'], key="uploader_file")
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded Image', use_column_width=True)
-            # Show Identify Specie button below the image
-            st.button("Identify Specie", key="identify_specie_button")
+            st.button("Identify Specie", key="identify_specie_upload_button")
         st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Camera section with modern styling
-    with col2:
+
+    with tab_camera:
         st.markdown("<div class='card fade'>", unsafe_allow_html=True)
         if 'camera_active' not in st.session_state:
             st.session_state.camera_active = False
 
-        # Camera controls
         st.markdown("<h4>📷 Take Picture</h4>", unsafe_allow_html=True)
-        # When the camera is inactive show a black placeholder that mimics the camera preview.
-        # It disappears when the user clicks Start Camera and the real camera input is opened.
         if not st.session_state.camera_active:
-            # Show ub2.png as a placeholder if it exists; otherwise fall back to the solid black div.
             try:
                 _placeholder_path = "ub2.png"
                 if os.path.exists(_placeholder_path):
                     with open(_placeholder_path, "rb") as _f:
                         _data = _f.read()
                     _b64 = base64.b64encode(_data).decode()
-                    # Use an <img> tag with object-fit to mimic the camera preview area and keep styling.
                     _img_html = (
                         f"<img src=\"data:image/png;base64,{_b64}\" "
                         "style=\"width:100%; aspect-ratio:4/3; min-height:280px; object-fit:cover; "
-                        "border-radius:8px; margin-bottom:0.75rem; box-shadow: inset 0 0 40px rgba(0,0,0,0.6);\"/>")
+                        "border-radius:12px; margin-bottom:0.75rem; box-shadow: inset 0 0 40px rgba(0,0,0,0.6);\"/>")
                     st.markdown(_img_html, unsafe_allow_html=True)
                 else:
                     st.markdown(
@@ -253,26 +241,23 @@ with st.container():
                         unsafe_allow_html=True,
                     )
             except Exception:
-                # If anything goes wrong showing the image, fall back to the black block so UI remains usable.
                 st.markdown(
                     "<div style='width:100%; aspect-ratio:4/3; min-height:280px; background:linear-gradient(180deg,#0b1220,#0b1220 60%, #0f172a); border-radius:12px; margin-bottom:0.75rem; box-shadow: inset 0 0 40px rgba(0,0,0,0.6);'></div>",
                     unsafe_allow_html=True,
                 )
 
-            # Use an on_click callback to reliably set session state and trigger a rerun so the placeholder is removed.
             def _start_camera():
                 st.session_state.camera_active = True
 
             st.button("Start Camera 📷", key="use_camera_button", on_click=_start_camera)
-        
+
         if st.session_state.camera_active:
             camera_photo = st.camera_input("Take a photo", key="camera_input")
             if camera_photo is not None:
                 image = Image.open(camera_photo)
                 st.image(image, caption='Captured Photo', use_column_width=True)
-                # Show Identify Specie button below the captured photo
                 st.button("Identify Specie", key="identify_specie_camera_button")
-            
+
             if st.button("Stop Camera ⏹️", key="stop_camera_button", help="Click to stop camera preview"):
                 st.session_state.camera_active = False
         st.markdown("</div>", unsafe_allow_html=True)

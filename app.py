@@ -334,6 +334,10 @@ with st.container():
         st.markdown("<div class='hint'>PNG or JPEG. Clear, close-up shots improve results.</div>", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Select a bird image", type=['png', 'jpg', 'jpeg'], key="uploader_file")
         if uploaded_file is not None:
+            # Clear previous result when new image is uploaded
+            if 'upload_result' in st.session_state:
+                del st.session_state.upload_result
+            
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded Image', use_column_width=True)
             
@@ -343,17 +347,31 @@ with st.container():
                         result = predict_species(model, label_map, image)
                     
                     if result:
-                        st.markdown("<div class='result-card'>", unsafe_allow_html=True)
-                        st.markdown("<div class='result-title'>🦅 Identification Result</div>", unsafe_allow_html=True)
-                        st.markdown(f"""
-                        <div class='result-item'>
-                            <div class='result-species'>{result['species']}</div>
-                            <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        st.markdown("</div>", unsafe_allow_html=True)
+                        # Store result in session state
+                        st.session_state.upload_result = result
+                        st.session_state.upload_image = image
+                    else:
+                        st.error("Failed to predict species. Please try again.")
                 else:
                     st.error("Model or label map not loaded. Please check if the files exist.")
+            
+            # Display result if available
+            if 'upload_result' in st.session_state and st.session_state.upload_result:
+                result = st.session_state.upload_result
+                st.markdown("<div class='result-title'>🦅 Identification Result</div>", unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class='result-item'>
+                    <div class='result-species'>{result['species']}</div>
+                    <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Watch video button
+                bird_name = result['species'].replace(' ', '+')
+                youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
+                st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 0.5rem;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                
+                st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     with tab_camera:
@@ -392,6 +410,10 @@ with st.container():
         if st.session_state.camera_active:
             camera_photo = st.camera_input("Take a photo", key="camera_input")
             if camera_photo is not None:
+                # Clear previous result when new photo is captured
+                if 'camera_result' in st.session_state:
+                    del st.session_state.camera_result
+                
                 image = Image.open(camera_photo)
                 st.image(image, caption='Captured Photo', use_column_width=True)
                 
@@ -401,16 +423,31 @@ with st.container():
                             result = predict_species(model, label_map, image)
                         
                         if result:
-                            st.markdown("<div class='result-title'>🦅 Identification Result</div>", unsafe_allow_html=True)
-                            st.markdown(f"""
-                            <div class='result-item'>
-                                <div class='result-species'>{result['species']}</div>
-                                <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            st.markdown("</div>", unsafe_allow_html=True)
+                            # Store result in session state
+                            st.session_state.camera_result = result
+                            st.session_state.camera_image = image
+                        else:
+                            st.error("Failed to predict species. Please try again.")
                     else:
                         st.error("Model or label map not loaded. Please check if the files exist.")
+                
+                # Display result if available
+                if 'camera_result' in st.session_state and st.session_state.camera_result:
+                    result = st.session_state.camera_result
+                    st.markdown("<div class='result-title'>🦅 Identification Result</div>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class='result-item'>
+                        <div class='result-species'>{result['species']}</div>
+                        <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Watch video button
+                    bird_name = result['species'].replace(' ', '+')
+                    youtube_url = f"https://www.youtube.com/results?search_query={bird_name}+bird+uganda"
+                    st.markdown(f'<a href="{youtube_url}" target="_blank"><button style="background: linear-gradient(135deg, #0e7490, #06b6d4); color: white; border: 0; padding: 0.7rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 0.5rem;">📹 Watch Video</button></a>', unsafe_allow_html=True)
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
 
             if st.button("Stop Camera ⏹️", key="stop_camera_button", help="Click to stop camera preview"):
                 st.session_state.camera_active = False

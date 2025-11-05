@@ -169,7 +169,6 @@ try:
 
     # Hero header with logo and gradient title
     with st.container():
-        st.markdown("<div class='hero fade'>", unsafe_allow_html=True)
         logo_col, text_col = st.columns([1, 3])
         with logo_col:
             st.image(_logo_small, use_column_width=False)
@@ -207,7 +206,6 @@ with st.container():
     tab_upload, tab_camera = st.tabs(["📁 Upload", "📷 Camera"])
 
     with tab_upload:
-        st.markdown("<div class='card fade'>", unsafe_allow_html=True)
         st.markdown("<h4>📁 Upload Image</h4>", unsafe_allow_html=True)
         st.markdown("<div class='hint'>PNG or JPEG. Clear, close-up shots improve results.</div>", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Select a bird image", type=['png', 'jpg', 'jpeg'], key="uploader_file")
@@ -218,7 +216,6 @@ with st.container():
         st.markdown("</div>", unsafe_allow_html=True)
 
     with tab_camera:
-        st.markdown("<div class='card fade'>", unsafe_allow_html=True)
         if 'camera_active' not in st.session_state:
             st.session_state.camera_active = False
 
@@ -275,7 +272,7 @@ with st.container():
     st.markdown(
         """
         <div style='text-align:center; color:#94a3b8; margin-top: 1rem; font-size:.9rem;'>
-            Built with ❤️ for nature enthusiasts · Modern UI theme applied
+            Built for the Love of Nature
         </div>
         """,
         unsafe_allow_html=True,

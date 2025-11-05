@@ -1,9 +1,12 @@
 import streamlit as st
 from PIL import Image
-# Note: OpenCV (cv2) is optional. Remove the import to avoid deployment issues unless you add
-# `opencv-python` to your `requirements.txt` and your deployment environment supports it.
 import base64
 import os
+import json
+import torch
+import torch.nn as nn
+from torchvision import transforms, models
+import numpy as np
 
 # Display logo (centered and resized to one-quarter of original dimensions)
 def _set_background_glass(img_path: str = "ugb1.png"):
@@ -42,6 +45,92 @@ def _set_background_glass(img_path: str = "ugb1.png"):
 
 # Apply the background/glass style
 _set_background_glass("ugb1.png")
+
+# Model loading and prediction functions
+@st.cache_resource
+def load_model():
+    """Load the ResNet34 model with trained weights"""
+    try:
+        model = models.resnet34(weights=None)
+        num_classes = 30  # Based on label_map.json having 30 classes
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        
+        # Load weights
+        if os.path.exists("resnet34_weights.pth"):
+            model.load_state_dict(torch.load("resnet34_weights.pth", map_location=torch.device('cpu')))
+            model.eval()
+            return model
+        else:
+            st.error("Model file not found: resnet34_weights.pth")
+            return None
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
+
+@st.cache_data
+def load_label_map():
+    """Load the label mapping from JSON file"""
+    try:
+        if os.path.exists("label_map.json"):
+            with open("label_map.json", "r") as f:
+                label_map = json.load(f)
+            # Reverse mapping: index -> bird name
+            idx_to_label = {v: k for k, v in label_map.items()}
+            return idx_to_label
+        else:
+            st.error("Label map file not found: label_map.json")
+            return None
+    except Exception as e:
+        st.error(f"Error loading label map: {str(e)}")
+        return None
+
+def preprocess_image(image):
+    """Preprocess image for model input"""
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    
+    # Convert to RGB if needed
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+    
+    image_tensor = transform(image).unsqueeze(0)
+    return image_tensor
+
+def predict_species(model, label_map, image):
+    """Predict bird species from image"""
+    try:
+        # Preprocess image
+        image_tensor = preprocess_image(image)
+        
+        # Make prediction
+        with torch.no_grad():
+            outputs = model(image_tensor)
+            probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
+            
+        # Get top 3 predictions
+        top3_prob, top3_indices = torch.topk(probabilities, 3)
+        
+        results = []
+        for i in range(3):
+            idx = top3_indices[i].item()
+            prob = top3_prob[i].item()
+            bird_name = label_map.get(idx, f"Class {idx}")
+            results.append({
+                'species': bird_name,
+                'confidence': prob * 100
+            })
+        
+        return results
+    except Exception as e:
+        st.error(f"Error during prediction: {str(e)}")
+        return None
+
+# Load model and label map
+model = load_model()
+label_map = load_label_map()
 
 # Global modern theme: fonts, colors, animations, components polish
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
@@ -161,6 +250,39 @@ html, body, .stApp { font-family: Inter, system-ui, -apple-system, Segoe UI, Rob
   margin-bottom: 0.75rem;
   font-weight: 600;
 }
+.result-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 2px solid rgba(16,185,129,0.2);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1rem 0;
+  box-shadow: 0 4px 12px rgba(16,185,129,0.1);
+}
+.result-title {
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.result-item {
+  background: #ffffff;
+  border-left: 4px solid #16a34a;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.result-species {
+  color: #0f172a;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.result-confidence {
+  color: #16a34a;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
 </style>""", unsafe_allow_html=True)
 try:
     _logo = Image.open("ugb1.png")
@@ -215,7 +337,25 @@ with st.container():
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded Image', use_column_width=True)
-            st.button("Identify Specie", key="identify_specie_upload_button")
+            
+            if st.button("Identify Specie", key="identify_specie_upload_button"):
+                if model is not None and label_map is not None:
+                    with st.spinner("🔍 Analyzing image..."):
+                        results = predict_species(model, label_map, image)
+                    
+                    if results:
+                        st.markdown("<div class='result-card'>", unsafe_allow_html=True)
+                        st.markdown("<div class='result-title'>🦅 Identification Results</div>", unsafe_allow_html=True)
+                        for i, result in enumerate(results):
+                            st.markdown(f"""
+                            <div class='result-item'>
+                                <div class='result-species'>{i+1}. {result['species']}</div>
+                                <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
+                else:
+                    st.error("Model or label map not loaded. Please check if the files exist.")
         st.markdown("</div>", unsafe_allow_html=True)
 
     with tab_camera:
@@ -256,7 +396,25 @@ with st.container():
             if camera_photo is not None:
                 image = Image.open(camera_photo)
                 st.image(image, caption='Captured Photo', use_column_width=True)
-                st.button("Identify Specie", key="identify_specie_camera_button")
+                
+                if st.button("Identify Specie", key="identify_specie_camera_button"):
+                    if model is not None and label_map is not None:
+                        with st.spinner("🔍 Analyzing image..."):
+                            results = predict_species(model, label_map, image)
+                        
+                        if results:
+                            st.markdown("<div class='result-card'>", unsafe_allow_html=True)
+                            st.markdown("<div class='result-title'>🦅 Identification Results</div>", unsafe_allow_html=True)
+                            for i, result in enumerate(results):
+                                st.markdown(f"""
+                                <div class='result-item'>
+                                    <div class='result-species'>{i+1}. {result['species']}</div>
+                                    <div class='result-confidence'>Confidence: {result['confidence']:.2f}%</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            st.markdown("</div>", unsafe_allow_html=True)
+                    else:
+                        st.error("Model or label map not loaded. Please check if the files exist.")
 
             if st.button("Stop Camera ⏹️", key="stop_camera_button", help="Click to stop camera preview"):
                 st.session_state.camera_active = False

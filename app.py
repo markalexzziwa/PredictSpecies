@@ -467,8 +467,6 @@ with st.container():
             # Clear previous result when new image is uploaded
             if 'upload_result' in st.session_state:
                 del st.session_state.upload_result
-            if 'generate_video_upload' in st.session_state:
-                del st.session_state.generate_video_upload
             
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded Image', use_column_width=True)
@@ -500,21 +498,7 @@ with st.container():
                 
                 # Generate video button
                 if st.button("🎬 Generate Video", key="generate_video_upload", use_container_width=True):
-                    st.session_state.generate_video_upload = True
-                
-                # Show video placeholder or generated video
-                if st.session_state.get('generate_video_upload', False):
                     if 'upload_image' in st.session_state:
-                        # Show placeholder immediately
-                        placeholder_video = st.empty()
-                        placeholder_video.markdown("""
-                        <div style='background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px dashed #94a3b8; border-radius: 12px; padding: 3rem; text-align: center; margin: 1rem 0;'>
-                            <div style='font-size: 3rem; margin-bottom: 1rem;'>🎬</div>
-                            <div style='color: #0f172a; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;'>Generating Video...</div>
-                            <div style='color: #64748b; font-size: 0.9rem;'>Creating narration and combining with your image</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
                         with st.spinner("🎬 Generating video with narration..."):
                             # Save image temporarily
                             with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
@@ -528,9 +512,6 @@ with st.container():
                             video_file = generate_video(result['species'], img_path, video_path)
                             
                             if video_file and os.path.exists(video_file):
-                                # Clear placeholder and show actual video
-                                placeholder_video.empty()
-                                
                                 # Display video
                                 with open(video_file, 'rb') as f:
                                     video_bytes = f.read()
@@ -551,7 +532,6 @@ with st.container():
                                 except:
                                     pass
                             else:
-                                placeholder_video.empty()
                                 st.error("Failed to generate video. Please try again.")
                     else:
                         st.error("Image not found. Please upload an image again.")
@@ -598,8 +578,6 @@ with st.container():
                 # Clear previous result when new photo is captured
                 if 'camera_result' in st.session_state:
                     del st.session_state.camera_result
-                if 'generate_video_camera' in st.session_state:
-                    del st.session_state.generate_video_camera
                 
                 image = Image.open(camera_photo)
                 st.image(image, caption='Captured Photo', use_column_width=True)
@@ -631,21 +609,7 @@ with st.container():
                     
                     # Generate video button
                     if st.button("🎬 Generate Video", key="generate_video_camera", use_container_width=True):
-                        st.session_state.generate_video_camera = True
-                    
-                    # Show video placeholder or generated video
-                    if st.session_state.get('generate_video_camera', False):
                         if 'camera_image' in st.session_state:
-                            # Show placeholder immediately
-                            placeholder_video = st.empty()
-                            placeholder_video.markdown("""
-                            <div style='background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px dashed #94a3b8; border-radius: 12px; padding: 3rem; text-align: center; margin: 1rem 0;'>
-                                <div style='font-size: 3rem; margin-bottom: 1rem;'>🎬</div>
-                                <div style='color: #0f172a; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;'>Generating Video...</div>
-                                <div style='color: #64748b; font-size: 0.9rem;'>Creating narration and combining with your image</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
                             with st.spinner("🎬 Generating video with narration..."):
                                 # Save image temporarily
                                 with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
@@ -659,9 +623,6 @@ with st.container():
                                 video_file = generate_video(result['species'], img_path, video_path)
                                 
                                 if video_file and os.path.exists(video_file):
-                                    # Clear placeholder and show actual video
-                                    placeholder_video.empty()
-                                    
                                     # Display video
                                     with open(video_file, 'rb') as f:
                                         video_bytes = f.read()
@@ -682,7 +643,6 @@ with st.container():
                                     except:
                                         pass
                                 else:
-                                    placeholder_video.empty()
                                     st.error("Failed to generate video. Please try again.")
                         else:
                             st.error("Image not found. Please capture an image again.")
